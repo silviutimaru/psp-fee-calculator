@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PSP Fee Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #f7f7f7;
+    }
+    h1 { text-align: center; }
+    label {
+      margin-top: 15px;
+      display: block;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 20px;
+      padding: 12px;
+      width: 100%;
+      background-color: #1d72b8;
+      color: white;
+      font-size: 16px;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #155a91;
+    }
+    .result {
+      margin-top: 25px;
+      padding: 15px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <h1>PSP Fee Calculator</h1>
+
+  <label for="volume">Monthly Transaction Volume ($):</label>
+  <input type="number" id="volume" placeholder="e.g., 20000">
+
+  <label for="average">Average Transaction Value ($):</label>
+  <input type="number" id="average" placeholder="e.g., 50">
+
+  <label for="psp">Select PSP:</label>
+  <select id="psp">
+    <option value="stripe">Stripe</option>
+    <option value="paypal">PayPal</option>
+  </select>
+
+  <label for="fx">Currency Conversion Needed?</label>
+  <select id="fx">
+    <option value="yes">Yes</option>
+    <option value="no">No</option>
+  </select>
+
+  <button onclick="calculateFees()">Calculate Fees</button>
+
+  <div class="result" id="result"></div>
+
+  <script>
+    function calculateFees() {
+      const volume = parseFloat(document.getElementById("volume").value);
+      const average = parseFloat(document.getElementById("average").value);
+      const psp = document.getElementById("psp").value;
+      const fx = document.getElementById("fx").value;
+
+      if (isNaN(volume) || isNaN(average) || average === 0) {
+        alert("Please enter valid numbers.");
+        return;
+      }
+
+      const transactions = volume / average;
+      let percentFee = 0, fixedFee = 0, fxMargin = 0;
+
+      if (psp === "stripe") {
+        percentFee = 0.029;
+        fixedFee = 0.30;
+        fxMargin = 0.01;
+      } else if (psp === "paypal") {
+        percentFee = 0.0349;
+        fixedFee = 0.49;
+        fxMargin = 0.035;
+      }
+
+      const baseFee = (volume * percentFee) + (transactions * fixedFee);
+      const fxFee = fx === "yes" ? volume * fxMargin : 0;
+      const totalFee = baseFee + fxFee;
+      const effectiveRate = ((totalFee / volume) * 100).toFixed(2);
+
+      document.getElementById("result").innerHTML = `
+        <strong>Total Fees:</strong> $${totalFee.toFixed(2)}<br>
+        <strong>Effective Rate:</strong> ${effectiveRate}%<br>
+        <strong>Transactions:</strong> ${transactions.toFixed(0)}
+      `;
+    }
+  </script>
+</body>
+</html>
